@@ -9,12 +9,19 @@
         <link rel="stylesheet" type="text/css" href="index.css"  />
         
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <script type="text/javascript" src="index.js"></script>
+        <script src="index.js"></script>
     </head>
     <body>
         <h1>WebSocket H.264 Media Player</h1>
-        <video id="videoPlayer" controls></video>
-        <button id="streamingBtn">Start Streaming</button>
-        <p id="status">Status: Not connected</p>
+        <div class="video-player-containers">
+            <div class="video-player-container">
+                <video class="video-player" id="video-player-1" controls
+                    data-autoPlay
+                    data-startTimestampEpoch="1737074383"
+                    data-durationSec="15"
+                    data-segmentDurationSec="1"
+                    data-webSocketURL="ws://localhost:12345"></video>
+            </div>
+        </div>
     </body>
 </html>

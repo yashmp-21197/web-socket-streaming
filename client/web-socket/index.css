@@ -27,8 +27,15 @@ button {
 button:hover {
     background-color: #0056b3;
 }
-#status {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #333;
+
+.video-player-containers {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.video-player-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
