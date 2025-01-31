@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <title>WebSocket H.264 Media Player Client</title>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+        <script type="module" src="../../src/media-player.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="index.css" />
+        <script src="index.js"></script>
+    </head>
+    <body>
+        <h1>WebSocket H.264 Media Player Client</h1>
+        <div class="media-player-containers">
+            <div class="media-player-container">
+                <media-player class="media-player" id="media-player-1"
+                    auto-play
+                    start-timestamp-epoch="1737074383"
+                    duration-sec="15"
+                    segment-duration-sec="1"
+                    web-socket-url="ws://localhost:12345"></media-player>
+            </div>
+        </div>
+    </body>
+</html>

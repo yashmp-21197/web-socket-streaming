@@ -1,0 +1,65 @@
+import MediaPlayerLoader from './media-player-loader.js';
+import Utils from './utils.js';
+
+class MediaPlayer extends HTMLElement {
+
+    static observedAttributes = [];
+
+    #mpl;
+
+    constructor () {
+        super();
+
+        const shadow = this.attachShadow({ mode: "open" });
+
+        const videoElement = document.createElement("video");
+        videoElement.setAttribute("class", `video-${this.className}`);
+        videoElement.setAttribute("id", `video-${this.id}`);
+        videoElement.setAttribute("controls", "");
+
+        const videoElementStyle = document.createElement("style");
+        videoElementStyle.textContent = `
+            #${videoElement.getAttribute("id")} {
+                width: 100%;
+                border: 2px solid #000000;
+                border-radius: 8px;
+            }
+        `;
+
+        shadow.appendChild(videoElementStyle);
+        shadow.appendChild(videoElement);
+
+        const autoPlay = Utils.isNotNull(this.getAttribute("auto-play"));
+        const startTimestampEpoch = Number(this.getAttribute("start-timestamp-epoch"));
+        const durationSec = Number(this.getAttribute("duration-sec"));
+        const segmentDurationSec = Number(this.getAttribute("segment-duration-sec"));
+        const webSocketURL = this.getAttribute("web-socket-url");
+
+        this.#mpl = new MediaPlayerLoader(videoElement, autoPlay, startTimestampEpoch, durationSec, segmentDurationSec, webSocketURL);
+    }
+
+    connectedCallback () {
+        console.log("media-player element added to page.");
+        this.addEventListener("start", (e) => {
+            this.#mpl.init();
+        }, false);
+        this.addEventListener("stop", (e) => {
+            this.#mpl.destroy();
+        }, false);
+    }
+    
+    disconnectedCallback () {
+        console.log("media-player element removed from page.");
+        this.#mpl.destroy();
+    }
+    
+    adoptedCallback () {
+        console.log("media-player element moved to new page.");
+    }
+    
+    attributeChangedCallback (name, oldValue, newValue) {
+        console.log(`media-player attribute ${name} has changed from ${oldValue} to ${newValue}.`);
+    }
+}
+
+window.customElements.define("media-player", MediaPlayer);

@@ -5,7 +5,7 @@ import os
 import websockets
 
 
-MAX_MESSAGE_LENGTH = 100
+MAX_SEG_REQ_MSG_LEN = 100
 
 
 def parse_arguments():
@@ -41,7 +41,7 @@ async def handler(websocket, directory, verbose):
             request = json.loads(message)
 
             if request.get("type") == "segment":
-                if len(message) > MAX_MESSAGE_LENGTH:
+                if len(message) > MAX_SEG_REQ_MSG_LEN:
                     if verbose:
                         print(f'message too long: {message}: {len(message)}')
                     request["error"] = "MessageTooLong"
@@ -50,7 +50,7 @@ async def handler(websocket, directory, verbose):
                     try:
                         with open(os.path.join(directory, request.get("segment")), "rb") as f:
                             file_data = f.read()
-                            additional_data = (message + (' ' * (MAX_MESSAGE_LENGTH - len(message)))).encode()
+                            additional_data = (message + (' ' * (MAX_SEG_REQ_MSG_LEN - len(message)))).encode()
                             combined_data = additional_data + file_data
                             await websocket.send(combined_data)
                     except FileNotFoundError as e:
