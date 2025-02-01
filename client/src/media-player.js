@@ -29,13 +29,15 @@ class MediaPlayer extends HTMLElement {
         shadow.appendChild(videoElementStyle);
         shadow.appendChild(videoElement);
 
-        const autoPlay = Utils.isNotNull(this.getAttribute("auto-play"));
-        const startTimestampEpoch = Number(this.getAttribute("start-timestamp-epoch"));
-        const durationSec = Number(this.getAttribute("duration-sec"));
-        const segmentDurationSec = Number(this.getAttribute("segment-duration-sec"));
-        const webSocketURL = this.getAttribute("web-socket-url");
+        const mplConfig = {
+            autoPlay: this.getAttribute("autoPlay"),
+            startTimestampEpoch: this.getAttribute("startTimestampEpoch"),
+            durationSec: this.getAttribute("durationSec"),
+            segmentDurationSec: this.getAttribute("segmentDurationSec"),
+            webSocketURL: this.getAttribute("webSocketURL"),
+        };
 
-        this.#mpl = new MediaPlayerLoader(videoElement, autoPlay, startTimestampEpoch, durationSec, segmentDurationSec, webSocketURL);
+        this.#mpl = new MediaPlayerLoader(videoElement, mplConfig);
     }
 
     connectedCallback () {

@@ -56,30 +56,30 @@ class WebSocketLoader {
         if (this.#mplDict.size === 0) {
             this.#connect();
         }
-        this.#mplDict.set(mpl.id(), mpl);
+        this.#mplDict.set(mpl.id, mpl);
     }
 
     unregisterMPL = (mpl) => {
-        this.#mplDict.delete(mpl.id());
+        this.#mplDict.delete(mpl.id);
         if (this.#mplDict.size === 0) {
             this.#disconnect();
         }
     }
 
-    #mpl = (id) => {
+    #getMPL = (id) => {
         return this.#mplDict.get(id);
     }
 
-    #mplExists = (id) => {
-        return Utils.isDefined(this.#mpl(id));
+    #isMPLRegistered = (id) => {
+        return this.#mplDict.has(id);
     }
 
-    #cbIfMPLExists = (id, cb) => {
-        if (!this.#mplExists(id)) {
-            console.log("MPL client id not exists:", id);
+    #cbMPL = (id, cb) => {
+        if (!this.#isMPLRegistered(id)) {
+            console.log("MPL is not registered:", id);
             return;
         }
-        cb(this.#mpl(id));
+        cb(this.#getMPL(id));
     }
 
     static #getClientId = (json) => {
@@ -147,7 +147,7 @@ class WebSocketLoader {
     }
 
     send = (mpl, json) => {
-        WebSocketLoader.#setClientId(json, mpl.id());
+        WebSocketLoader.#setClientId(json, mpl.id);
         this.#ws.send(JSON.stringify(json));
     }
 
@@ -175,7 +175,7 @@ class WebSocketLoader {
             try {
                 const json = JSON.parse(new TextDecoder("utf-8").decode(event.data.slice(0, WebSocketLoader.#segResMsgLenMax)));
                 const data = new Uint8Array(event.data.slice(WebSocketLoader.#segResMsgLenMax));
-                this.#cbIfMPLExists(WebSocketLoader.#getClientId(json), (mpl) => {
+                this.#cbMPL(WebSocketLoader.#getClientId(json), (mpl) => {
                     mpl.onWSMessage({
                         json: json,
                         data: data
@@ -187,7 +187,7 @@ class WebSocketLoader {
         } else {
             try {
                 const json = JSON.parse(event.data);
-                this.#cbIfMPLExists(WebSocketLoader.#getClientId(json), (mpl) => {
+                this.#cbMPL(WebSocketLoader.#getClientId(json), (mpl) => {
                     mpl.onWSMessage({
                         json: json
                     });

@@ -19,9 +19,9 @@ class MediaPlayerLoader {
 
     #wsl;
 
-    constructor (element, autoPlay, startTimestampEpoch, durationSec, segmentDurationSec, webSocketURL) {
+    constructor (element, config) {
         this.#element = element;
-        console.log("constructing: ", this.id());
+        console.log("constructing: ", this.id);
         this.#element.addEventListener('error', this.#handleEvent);
         this.#element.addEventListener('canplay', this.#handleEvent);
         this.#element.addEventListener('pause', this.#handleEvent);
@@ -30,27 +30,28 @@ class MediaPlayerLoader {
         this.#mediaSource = null;
         this.#sourceBuffer = null;
 
-        this.#autoPlay = autoPlay;
+        this.#autoPlay = Utils.isNotNull(config.autoPlay);
         this.#isPaused = !this.#autoPlay;
 
-        this.#startTimestampEpoch = startTimestampEpoch;
-        this.#durationSec = durationSec;
+        this.#startTimestampEpoch = Number(config.startTimestampEpoch);
+        this.#durationSec = Number(config.durationSec);
         this.#endTimestampEpoch = this.#startTimestampEpoch + this.#durationSec - 1;
         // currentTimestamp = startTimestamp;
-        this.#segmentDurationSec = segmentDurationSec;
+        this.#segmentDurationSec = Number(config.segmentDurationSec);
+
         this.#sbTimestampOffset = -1 * this.#startTimestampEpoch;
         this.#msDuration = this.#durationSec;
 
-        this.#wsl = WebSocketLoader.getInstance(webSocketURL);
+        this.#wsl = WebSocketLoader.getInstance(config.webSocketURL);
         this.#wsl.registerMPL(this);
     }
 
-    id = () => {
+    get id () {
         return this.#element.id;
     }
 
     #handleEvent = (event) => {
-        console.log(this.id(), ":", event);
+        console.log(this.id, ":", event);
 
         if (event.type === 'error') {
 
@@ -63,7 +64,7 @@ class MediaPlayerLoader {
         } else if (event.type === 'play') {
             this.#isPaused = false;
         } else {
-            console.log(this.id(), ": unhandled:", event.type);
+            console.log(this.id, ": unhandled:", event.type);
         }
     }
 
@@ -78,10 +79,10 @@ class MediaPlayerLoader {
         this.#element.src = URL.createObjectURL(this.#mediaSource);
 
         this.#mediaSource.addEventListener("sourceopen", () => {
-            console.log(this.id(), ": media-source is open");
+            console.log(this.id, ": media-source is open");
             const mimeCodec = 'video/mp4; codecs="avc1.640028"';
             this.#sourceBuffer = this.#mediaSource.addSourceBuffer(mimeCodec);
-            console.log(this.id(), ": source-buffer added:", mimeCodec);
+            console.log(this.id, ": source-buffer added:", mimeCodec);
 
             this.#mediaSource.duration = this.#msDuration;
             this.#sourceBuffer.timestampOffset = this.#sbTimestampOffset;
@@ -89,7 +90,7 @@ class MediaPlayerLoader {
             this.#sourceBuffer.addEventListener("updateend", () => {
                 // mediaSource.endOfStream();
                 // video.play();
-                // console.log(this.id() + " " + this.mediaSource.readyState);
+                // console.log(this.id + " " + this.mediaSource.readyState);
             });
 
             // video.addEventListener('timeupdate', checkBuffer);
@@ -106,7 +107,7 @@ class MediaPlayerLoader {
         });
 
         this.#mediaSource.addEventListener("sourceended", () => {
-            console.log(this.id(), ": media-source ended");
+            console.log(this.id, ": media-source ended");
         });
     }
 
@@ -118,15 +119,15 @@ class MediaPlayerLoader {
                 if (!this.#sourceBuffer.updating) {
                     try {
                         this.#sourceBuffer.remove(0, this.#mediaSource.duration);
-                        console.log(this.id(), ": cleared source-buffer");
+                        console.log(this.id, ": cleared source-buffer");
                     } catch (e) {
-                        console.log(this.id(), ": Error clearing SourceBuffer:", e);
+                        console.log(this.id, ": Error clearing SourceBuffer:", e);
                     }
                 }
                 this.#sourceBuffer = null;
             }
             this.#mediaSource = null;
-            console.log(this.id(), ": media-source deinitialized");
+            console.log(this.id, ": media-source deinitialized");
         }
 
         this.#element.src = "";
@@ -134,20 +135,20 @@ class MediaPlayerLoader {
 
     onWSMessage = ({json, data}={}) => {
         if (Utils.isUndefined(data)) {
-            console.log(this.id(), ": JSON message received: ", json);
+            console.log(this.id, ": JSON message received: ", json);
         } else {
-            console.log(this.id(), ": Received media segment (ArrayBuffer)");
+            console.log(this.id, ": Received media segment (ArrayBuffer)");
 
             if (!this.#sourceBuffer || this.#sourceBuffer.updating) {
-                console.log(this.id(), ": SourceBuffer is not ready or updating");
+                console.log(this.id, ": SourceBuffer is not ready or updating");
                 return;
             }
 
             try {
                 this.#sourceBuffer.appendBuffer(data);
-                console.log(this.id(), ": Appended segment");
+                console.log(this.id, ": Appended segment");
             } catch (e) {
-                console.log(this.id(), ": Error appending segment:", e);
+                console.log(this.id, ": Error appending segment:", e);
             }
 
             // if(current <= end){
